@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- ===== ЕДИНСТВЕННАЯ НАСТРОЙКА: полный адрес опубликованной страницы (со слэшем в конце) ===== -->
+<!-- Замените https://example.github.io/gagauzia2026/ на ваш адрес во всех тегах ниже (Ctrl+H). -->
+<title>Как проголосует Гагаузия? Анонимный опрос</title>
+<meta name="description" content="Анонимный опрос перед выборами башкана и Народного Собрания Гагаузии 15 ноября 2026 года. Три минуты, без имён и телефонов.">
+<link rel="canonical" href="https://example.github.io/gagauzia2026/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#2f74b5">
+<meta name="color-scheme" content="light">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Опрос Гагаузия">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- Open Graph: Facebook, Instagram, Telegram, Viber, WhatsApp, Odnoklassniki -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Предвыборный опрос в Гагаузии">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://example.github.io/gagauzia2026/">
+<meta property="og:title" content="Как проголосует Гагаузия?">
+<meta property="og:description" content="Анонимный опрос перед выборами башкана и Народного Собрания 15 ноября. Три минуты, без имён и телефонов.">
+<meta property="og:image" content="https://example.github.io/gagauzia2026/og.png">
+<meta property="og:image:secure_url" content="https://example.github.io/gagauzia2026/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Как проголосует Гагаузия? Анонимный опрос, три минуты">
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Как проголосует Гагаузия?">
+<meta name="twitter:description" content="Анонимный опрос перед выборами 15 ноября. Три минуты, без имён и телефонов.">
+<meta name="twitter:image" content="https://example.github.io/gagauzia2026/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--text:#12324f;--muted:#5b6b7c;--sky:#2f74b5;--sky-d:#245c92;--gold:#e8b53a;--gold-d:#c9971f;--border:#d3dde8;--err:#b8352a;--ok:#2f7d4f;--sel:#eef6ff}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.5 "Golos Text",Inter,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+.band{background:var(--sky);color:#fff;position:relative}
+.band::after{content:"";display:block;height:10px;background:linear-gradient(#fff 0 50%,#c9412b 50% 100%)}
+.band .in{max-width:720px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 18px max(16px,env(safe-area-inset-left));display:flex;align-items:center;gap:14px}
+.stars{display:flex;flex-direction:column;gap:3px;flex:0 0 auto}
+.stars span{width:14px;height:14px;background:var(--gold);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+h1{font-size:22px;line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
+.band .sub{margin:3px 0 0;font-size:14px;opacity:.9}
+.wrap{max-width:720px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.progress{height:6px;background:#dce5ef;border-radius:3px;overflow:hidden;margin:6px 0 4px}
+.progress>div{height:100%;background:var(--gold);width:0;transition:width .3s}
+.pcount{font-size:13px;color:var(--muted);margin-bottom:6px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 18px 16px;margin:14px 0}
+.card.err{border-color:var(--err)}
+.q{font-weight:600;margin:0 0 4px;font-size:18px;line-height:1.35}
+.hint{color:var(--muted);font-size:14px;margin:0 0 10px}
+.errmsg{display:none;color:var(--err);font-size:14px;margin:0 0 8px;font-weight:500}
+.card.err .errmsg{display:block}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:12px 13px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:#fff;user-select:none;transition:border-color .12s,background .12s}
+.opt:hover{border-color:#9fb6cc}
+.opt input{margin:3px 0 0;width:20px;height:20px;flex:0 0 20px;accent-color:var(--sky)}
+.opt.sel{border-color:var(--sky);background:var(--sel)}
+.opt.dis{opacity:.4;cursor:not-allowed}
+.opt .lbl{flex:1}
+.opt:focus-within{outline:3px solid rgba(47,116,181,.35);outline-offset:1px}
+.party{color:var(--muted);font-size:14px}
+input[type=text],select{width:100%;font:inherit;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;background:#fff;margin-top:6px;color:var(--text)}
+select{appearance:auto}
+.matrix{display:flex;flex-direction:column;gap:14px}
+.mrow{border-top:1px solid #e6edf4;padding-top:10px}
+.mrow .rl{font-weight:600;margin-bottom:6px}
+.mrow .opts{gap:4px}
+.mrow .opt{padding:8px 11px;font-size:15px;align-items:center}
+.mrow .opt input{margin:0;width:16px;height:16px;flex-basis:16px}
+.nav{display:flex;gap:12px;justify-content:space-between;margin-top:20px}
+button{font:inherit;font-weight:600;padding:14px 28px;border-radius:12px;border:0;cursor:pointer;font-size:17px}
+button:focus-visible{outline:3px solid rgba(47,116,181,.4);outline-offset:2px}
+.btn-next{background:var(--sky);color:#fff;margin-left:auto}
+.btn-next:hover{background:var(--sky-d)}
+.btn-prev{background:#e3eaf2;color:var(--text)}
+.intro p{margin:0 0 12px}
+.intro .lead{font-size:19px;font-weight:600;line-height:1.35}
+.thanks{text-align:center;padding:44px 12px}
+.thanks h2{color:var(--ok);font-size:28px;margin:0 0 8px}
+.hidden{display:none !important}
+.small{font-size:14px;color:var(--muted)}
+a{color:var(--sky)}
+.note{background:#fff7df;border:1px solid #f0dc9c;border-radius:10px;padding:10px 12px;font-size:14px;margin:8px 0 0}
+@media (prefers-reduced-motion:reduce){.progress>div,.opt{transition:none}}
+@media (max-width:360px){body{font-size:16px}h1{font-size:20px}.q{font-size:17px}button{padding:13px 20px;font-size:16px}.card{padding:16px 14px 12px}}
+@media (min-width:900px){body{font-size:18px}.q{font-size:19px}}
+@media (hover:none){.opt:hover{border-color:var(--border)}.opt:active{background:var(--sel)}}
+@media print{.band,.nav,.progress{display:none}}
+</style>
+</head>
+<body>
+<div class="band"><div class="in">
+  <div class="stars"><span></span><span></span><span></span></div>
+  <div><h1>Предвыборный опрос в Гагаузии</h1><p class="sub">Выборы башкана и Народного Собрания, 15 ноября 2026</p></div>
+</div></div>
+<div class="wrap">
+<header>
+  <div class="progress"><div id="pbar"></div></div>
+  <div class="pcount" id="pcount"></div>
+</header>
+<main id="main"></main>
+</div>
+
+<script>
+/* ======================= КОНФИГУРАЦИЯ ======================= */
+// После публикации Apps Script вставьте сюда URL веб-приложения (…/exec)
+const ENDPOINT = "PASTE_APPS_SCRIPT_WEB_APP_URL_HERE";
+const SURVEY_ID = "gagauzia2026";
+
+const NA = "Не хочу отвечать";
+const PARTIC = ["Точно приму участие","Скорее приму участие","Скорее не приму участие","Точно не приму участие","Затрудняюсь ответить",NA];
+const TAIL_CAND = ["Ещё не решил(а)","Не буду голосовать",NA];
+
+const LOCALITIES = ["Авдарма","Баурчи","Бешалма","Бешгиоз","Буджак","Верхний Конгазчик","Вулканешты","Гайдар","Дезгинжа","Джолтай","Казаклия","Карбалия","Кириет-Лунга","Кирсово","Комрат","Конгаз","Копчак","Котовское","Русская Киселия","Светлый","Томай","Ферапонтьевка","Чадыр-Лунга","Чишмикиой","Чок-Майдан","Этулия"];
+// Населённый пункт -> список округов
+const LOC_DISTRICTS = {"Комрат":[1,2,3,4],"Чадыр-Лунга":[5,6,7],"Вулканешты":[8,9,10],"Авдарма":[11],"Баурчи":[12],"Бешалма":[13],"Бешгиоз":[14],"Буджак":[15],"Чишмикиой":[16],"Чок-Майдан":[17],"Дезгинжа":[18],"Джолтай":[19],"Этулия":[20],"Ферапонтьевка":[21],"Гайдар":[22],"Карбалия":[23],"Казаклия":[24],"Кириет-Лунга":[25],"Кирсово":[26],"Конгаз":[27,28],"Верхний Конгазчик":[29],"Копчак":[30,31],"Котовское":[32],"Русская Киселия":[33],"Светлый":[34],"Томай":[35]};
+const IND="независимый кандидат", PSRM="ПСРМ", PPG="PPG", MAN="MAN", AM="«Alianța MOLDOVENII»", PT="«Pentru Țară»";
+// Кандидаты по округам (halktoplushu.md, сверено 18.10.2026)
+const CANDIDATES = {
+ 1:{n:"Комрат",c:[["Максим Болгар",MAN],["Николай Дудогло",PPG],["Сергей Кюлафлы",IND]]},
+ 2:{n:"Комрат",c:[["Сергей Гагауз",IND],["Алексей Кара",IND],["Александр Караиван",IND],["Анастасия Кирилловская",IND],["Александр Левандовски",PPG],["Иван Паня",IND],["Артём Сары",IND]]},
+ 3:{n:"Комрат",c:[["Иван Кыльчик",PPG],["Ольга Митиогло",IND],["Василий Новак",IND],["Александр Тарнавский",IND],["Вадим Чебан",IND]]},
+ 4:{n:"Комрат",c:[["Иван Димитрогло",PSRM],["Юрий Кара",IND],["Георгий Митиогло",PPG],["Олег Сибов",IND]]},
+ 5:{n:"Чадыр-Лунга",c:[["Николай Иванчук",IND],["Дмитрий Кисеев",IND],["Оксана Константинова",PSRM],["Андрей Михайлов",IND],["Виктор Топчу",IND]]},
+ 6:{n:"Чадыр-Лунга",c:[["Анатолий Кулев",PSRM],["Георгий Лейчу",IND],["Иван Меше",PPG],["Наталья Михальчук",IND]]},
+ 7:{n:"Чадыр-Лунга",c:[["Людмила Карадаг",IND],["Виктор Топал",IND],["Елена Юрченко",PSRM]]},
+ 8:{n:"Вулканешты",c:[["Сергей Делистоян",IND],["Олеся Мокан",IND],["Александр Топораш",PSRM],["Олег Топораш",PT],["Штефан Греку",AM]]},
+ 9:{n:"Вулканешты",c:[["Корнел Дудник",IND],["Олег Милков",AM],["Сергей Пономаренко",PSRM],["Михаил Савастин",IND]]},
+ 10:{n:"Вулканешты",c:[["Пётр Фазлы",PSRM],["Роман Тютин",AM]]},
+ 11:{n:"Авдарма",c:[["Екатерина Грек",IND],["Виталий Гуна",IND],["Александр Динжос",IND],["Дмитрий Карамит",PSRM]]},
+ 12:{n:"Баурчи",c:[["Сергей Димитриогло",AM],["Григорий Кадын",IND],["Георге Кеся",IND]]},
+ 13:{n:"Бешалма",c:[["Григорий Дюльгер",IND],["Георгий Кёся",PSRM]]},
+ 14:{n:"Бешгиоз",c:[["Виталие Братан",PSRM],["Михаил Молла",IND],["Мария Сеиз",IND]]},
+ 15:{n:"Буджак",c:[["Валентин Бербер",IND],["Владимир Кысса",IND],["Александр Панов",IND]]},
+ 16:{n:"Чишмикиой",c:[["Георгий Боев",IND],["Андрей Стоянов",PSRM],["Дмитрий Янул",IND]]},
+ 17:{n:"Чок-Майдан",c:[["Анатолий Плукчи",IND],["Пётр Яниогло",IND]]},
+ 18:{n:"Дезгинжа",c:[["Дмитрий Капсамун",PPG],["Николай Киряков",PSRM],["Николай Рая",IND],["Андрей Сары",IND]]},
+ 19:{n:"Джолтай",c:[["Николай Андрушой",IND],["Юрий Камбур",PSRM]]},
+ 20:{n:"Этулия",c:[["Сергей Куйджуклу",IND],["Анна Мынзат",AM],["Михаил Попов",PSRM],["Катерина Сербинова",PT]]},
+ 21:{n:"Ферапонтьевка",c:[["Мариана Музюк",PSRM],["Александр Односталко",AM],["Виталий Чебану",IND],["Эльвира Петкогло",IND]]},
+ 22:{n:"Гайдар",c:[["Георгий Беженар",IND],["Мария Солоненко",PSRM],["Иван Чеботарь",IND],["Иван Топал",IND]]},
+ 23:{n:"Карбалия",c:[["Олег Гайдаржи",PPG],["Василиса Дерменжи",IND],["Мария Дерменжи",AM],["Николай Унту",PSRM]]},
+ 24:{n:"Казаклия",c:[["Александр Дюльгер",IND],["Елена Момат",IND],["Анатолий Узун",IND]]},
+ 25:{n:"Кириет-Лунга",c:[["Иван Бургуджи",IND],["Николай Ташогло",PPG],["Георгий Куюджуклу",IND],["Владимир Железогло",IND]]},
+ 26:{n:"Кирсово",c:[["Эдгар Димов",IND],["Виктор Златовчен",IND],["Степан Короляк",IND],["Степан Пирон",IND],["Степан Сариогло",IND],["Василий Стойнов",IND],["Владимир Томайлы",PSRM]]},
+ 27:{n:"Конгаз",c:[["Иван Бессараб",IND],["Михаил Карасени",IND],["Василий Ясыбаш",IND],["Иордан Ясыбаш",PPG],["Степан Арнаут",PSRM]]},
+ 28:{n:"Конгаз",c:[["Виталий Кюркчу",IND],["Степан Манолов",IND],["Анна Статова",IND],["Гаврил Тулба",IND]]},
+ 29:{n:"Верхний Конгазчик",c:[["Сергей Захария",IND],["Дмитрий Кичук",PSRM],["Лидия Осташ",IND]]},
+ 30:{n:"Копчак",c:[["Олег Гаризан",IND],["Валерий Колиогло",IND],["Валерий Манастырлы",IND],["Евгений Мурзакой",IND],["Екатерина Франжева",PSRM],["Сергей Юсюмбели",IND]]},
+ 31:{n:"Копчак",c:[["Виталий Арнаут",IND],["Александр Галацан",IND],["Сергей Гаризан",IND],["Дмитрий Манастырлы",IND],["Вячеслав Сакалы",IND]]},
+ 32:{n:"Котовское",c:[["Дмитрий Гучь",MAN],["Николай Орманжи",IND],["Светлана Регуш",IND],["Николай Сариогло",IND],["Фёдор Татар",IND]]},
+ 33:{n:"Русская Киселия",c:[["Николай Делибалтов",IND]]},
+ 34:{n:"Светлый",c:[["Валерий Куркин",IND],["Олег Македонский",IND],["Руслан Униловский",IND],["Дмитрий Чакир",PSRM]]},
+ 35:{n:"Томай",c:[["Дмитрий Балабан",IND],["Игорь Янак",IND],["Оксана Недялко-Калын",IND],["Мария Стамат",PSRM]]}
+};
+
+/* Вопросы. type: single | multi | matrix | select ; opts; random: число опций в начале списка, которые перемешиваются; show(a): условие показа */
+const Q1_OPTS=["Межнациональные отношения","Инфляция (рост цен)","Безработица","Коррупция","Голод","Будущее автономии","Война в регионе","Преступность","Бедность","Установление диктатуры","Низкое качество медицинских услуг","Энергетический кризис","Маленькая пенсия/зарплата","Отношение центральных властей к Гагаузии"];
+const QUESTIONS=[
+ {id:"Q1",page:1,type:"multi",max:3,text:"Какие из перечисленных проблем больше всего беспокоят вас на данный момент?",hint:"Выберите до трёх вариантов",
+  opts:[...Q1_OPTS,"Иное (уточните)","Не знаю",NA],random:Q1_OPTS.length,other:"Иное (уточните)",exclusive:["Не знаю",NA]},
+ {id:"Q2",page:1,type:"single",text:"Участвовали ли вы в выборах башкана Гагаузии в 2023 году?",
+  opts:["Да, в обоих турах","Да, только в первом туре","Да, только во втором туре","Нет, не участвовал(а)","Не помню",NA]},
+ {id:"Q3",page:1,type:"single",text:"За кого вы голосовали в первом туре (30 апреля 2023)?",
+  opts:["Евгения Гуцул","Григорий Узун","Виктор Петров","Дмитрий Кройтор","Николай Дудогло","Сергей Чимпоеш","Михаил Формузал","Сергей Чернев","Не помню",NA],random:8,
+  show:a=>a.Q2==="Да, в обоих турах"||a.Q2==="Да, только в первом туре"},
+ {id:"Q4",page:1,type:"single",text:"За кого вы голосовали во втором туре (14 мая 2023)?",
+  opts:["Евгения Гуцул","Григорий Узун","Не помню",NA],random:2,
+  show:a=>a.Q2==="Да, в обоих турах"||a.Q2==="Да, только во втором туре"},
+
+ {id:"Q5",page:2,type:"single",text:"Примете ли вы участие в выборах башкана Гагаузии 15 ноября?",opts:PARTIC},
+ {id:"Q6",page:2,type:"single",text:"Если вы пойдёте на выборы, за кого из этих кандидатов вы проголосуете?",
+  opts:["Фёдор Гагауз","Александр Стояногло","Корнелиу Дудник","Иван Кылчик","Пётр Влах","Иванна Коксал","Сергей Анастасов","Олег Гаризан",...TAIL_CAND],random:8,
+  show:a=>!!a.Q5},
+
+ {id:"Q7",page:3,type:"single",text:"Примете ли вы участие в выборах в Народное Собрание Гагаузии 15 ноября?",opts:PARTIC},
+ {id:"Q8",page:3,type:"select",text:"В каком населённом пункте вы зарегистрированы как избиратель?",
+  opts:[...LOCALITIES,NA],placeholder:"Выберите населённый пункт",show:a=>!!a.Q7},
+ {id:"Q9",page:3,type:"single",text:"В каком избирательном округе вы зарегистрированы?",
+  hint:"",dyn:true,show:a=>!!a.Q8&&a.Q8!==NA&&LOC_DISTRICTS[a.Q8].length>1},
+ {id:"Q10",page:3,type:"single",text:"Если вы пойдёте на выборы, за кого из этих кандидатов в вашем избирательном округе вы проголосуете?",
+  dyn:true,show:a=>!!districtOf(a)},
+
+ {id:"Q11",page:4,type:"matrix",text:"В какой степени нижеперечисленные государства и организации на данный момент помогают и поддерживают Гагаузию?",hint:"Один ответ в каждой строке",
+  rows:["Центральное правительство Республики Молдова","Турция","Украина","Евросоюз","США","Российская Федерация"],
+  cols:["Сильно помогают","Скорее помогают","Не помогают и не вредят","Скорее вредят","Сильно вредят","Не знаю",NA]},
+ {id:"Q12",page:4,type:"single",text:"Как вы оцениваете отношения между Кишинёвом и Комратом?",
+  opts:["Очень хорошие","Хорошие","Нейтральные","Плохие","Очень плохие","Не знаю",NA]},
+ {id:"Q13",page:4,type:"single",text:"На каком языке вы говорите дома?",
+  opts:["Русский","Гагаузский","Смешанный русский и гагаузский","Молдавский / Румынский","Болгарский","Украинский","Другой (укажите)",NA],other:"Другой (укажите)"},
+
+ {id:"Q14",page:5,type:"single",text:"Ваш пол",opts:["Мужской","Женский"]},
+ {id:"Q15",page:5,type:"single",text:"Сколько вам лет?",opts:["18–29","30–44","45–59","60+"],last:true}
+];
+const PAGES=5;
+
+/* ======================= СОСТОЯНИЕ ======================= */
+const STORE="sv_"+SURVEY_ID;
+const params=new URLSearchParams(location.search);
+let S;
+function load(){
+  try{ if(params.get("reset")) localStorage.removeItem(STORE); S=JSON.parse(localStorage.getItem(STORE)||"null"); }catch(e){ S=null; }
+  if(!S){
+    S={id:uid(),src:params.get("src")||"direct",started:new Date().toISOString(),page:0,status:"partial",a:{},order:{}};
+  }
+  if(!S.src||S.src==="direct") S.src=params.get("src")||S.src||"direct";
+}
+function save(){ try{ localStorage.setItem(STORE,JSON.stringify(S)); }catch(e){} }
+function uid(){ const b=new Uint8Array(12); crypto.getRandomValues(b); return Array.from(b,x=>x.toString(16).padStart(2,"0")).join(""); }
+function districtOf(a){
+  if(!a.Q8||a.Q8===NA) return null;
+  const d=LOC_DISTRICTS[a.Q8]; if(!d) return null;
+  if(d.length===1) return d[0];
+  const v=parseInt(String(a.Q9||"").replace(/\D/g,""),10); return (v&&d.includes(v))?v:null;
+}
+function order(q){ // устойчивый случайный порядок для респондента
+  const key=q.id+(q.id==="Q10"?"_"+districtOf(S.a):"");
+  const base=q.id==="Q10"?CANDIDATES[districtOf(S.a)].c.map(c=>c[0]):q.opts;
+  const n=q.id==="Q10"?base.length:(q.random||0);
+  if(!n) return base;
+  if(!S.order[key]||S.order[key].length!==base.length){
+    const idx=[...Array(n).keys()];
+    for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+    S.order[key]=[...idx,...Array.from({length:base.length-n},(_,i)=>n+i)]; save();
+  }
+  return S.order[key].map(i=>base[i]);
+}
+
+/* ======================= РЕНДЕР ======================= */
+const main=document.getElementById("main");
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function setProgress(){
+  const p=S.page; document.getElementById("pbar").style.width=(p/PAGES*100)+"%";
+  document.getElementById("pcount").textContent=p>0&&p<=PAGES?`Страница ${p} из ${PAGES}`:"";
+}
+function render(){
+  setProgress();
+  if(S.page===0) return renderIntro();
+  if(S.page>PAGES) return renderThanks();
+  main.innerHTML="";
+  QUESTIONS.filter(q=>q.page===S.page).forEach(q=>main.appendChild(renderQ(q)));
+  const nav=document.createElement("div"); nav.className="nav";
+  if(S.page>1){const b=document.createElement("button");b.className="btn-prev";b.textContent="Назад";b.onclick=()=>{S.page--;save();render();window.scrollTo(0,0);};nav.appendChild(b);}
+  if(S.page<PAGES){const b=document.createElement("button");b.className="btn-next";b.textContent="Далее";b.onclick=next;nav.appendChild(b);}
+  main.appendChild(nav);
+  refreshVisibility();
+}
+function renderIntro(){
+  main.innerHTML=`<div class="card intro">
+  <p class="lead">Какие проблемы для вас важнее всего и кому из кандидатов вы доверяете?</p>
+  <p>15 ноября 2026 года пройдут выборы башкана и Народного Собрания Гагаузии. Расскажите, что вы думаете сегодня.</p>
+  <p>Опрос полностью анонимен и занимает 3–4 минуты. Мы не собираем имена, телефоны или другие личные данные.</p>
+  <div class="nav"><button class="btn-next" id="start">Начать</button></div></div>`;
+  document.getElementById("start").onclick=()=>{S.page=1;save();render();window.scrollTo(0,0);};
+}
+function renderThanks(){
+  main.innerHTML=`<div class="card thanks"><h2>Спасибо!</h2><p>Ваши ответы сохранены.</p><p class="small">Отправьте ссылку друзьям и соседям: чем больше ответов, тем точнее картина.</p></div>`;
+  document.getElementById("pbar").style.width="100%";
+}
+function renderQ(q){
+  const card=document.createElement("div"); card.className="card"; card.id="card_"+q.id; card.dataset.q=q.id;
+  let h=`<p class="q">${esc(q.text)}</p>`;
+  if(q.hint||q.dyn) h+=`<p class="hint">${esc(q.hint||"")}</p>`;
+  h+=`<p class="errmsg"></p>`;
+  if(q.type==="select"){
+    h+=`<select>${q.placeholder?`<option value="">${esc(q.placeholder)}</option>`:""}${q.opts.map(o=>`<option ${S.a[q.id]===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+  }else if(q.type==="matrix"){
+    h+=`<div class="matrix">`+q.rows.map((r,ri)=>`<div class="mrow"><div class="rl">${esc(r)}</div><div class="opts">`+
+      q.cols.map(c=>{const name=q.id+"_"+ri;const sel=(S.a[q.id]||{})[r]===c;return `<label class="opt ${sel?"sel":""}"><input type="radio" name="${name}" value="${esc(c)}" ${sel?"checked":""}><span class="lbl">${esc(c)}</span></label>`;}).join("")+`</div></div>`).join("")+`</div>`;
+  }else{
+    h+=`<div class="opts"></div>`;
+  }
+  card.innerHTML=h;
+  if(q.type==="select"){ card.querySelector("select").onchange=e=>{S.a[q.id]=e.target.value||undefined; if(q.id==="Q8"){delete S.a.Q9;delete S.a.Q10;} save(); card.classList.remove("err"); refreshVisibility();}; }
+  else if(q.type==="matrix"){ card.querySelectorAll("input").forEach(inp=>inp.onchange=()=>{const ri=+inp.name.split("_")[1];S.a[q.id]=S.a[q.id]||{};S.a[q.id][q.rows[ri]]=inp.value;save();card.querySelectorAll(`input[name="${inp.name}"]`).forEach(i=>i.closest(".opt").classList.toggle("sel",i.checked));card.classList.remove("err");}); }
+  else if(!q.dyn) fillOpts(q,card);
+  return card;
+}
+function fillOpts(q,card){
+  const box=card.querySelector(".opts"); box.innerHTML="";
+  let opts, parties={};
+  if(q.id==="Q9"){ const d=LOC_DISTRICTS[S.a.Q8]||[]; opts=[...d.map(n=>"Округ № "+n),"Не знаю"]; card.querySelector(".hint").textContent=`Для ${S.a.Q8} — несколько округов.`; }
+  else if(q.id==="Q10"){ const d=districtOf(S.a); if(!d){return;} CANDIDATES[d].c.forEach(c=>parties[c[0]]=c[1]); opts=[...order(q),...TAIL_CAND]; card.querySelector(".hint").textContent=`${CANDIDATES[d].n}, избирательный округ № ${d}`; }
+  else opts=order(q);
+  const multi=q.type==="multi"; const cur=S.a[q.id];
+  opts.forEach(o=>{
+    const sel=multi?(Array.isArray(cur)&&cur.includes(o)):cur===o;
+    const l=document.createElement("label"); l.className="opt"+(sel?" sel":"");
+    l.innerHTML=`<input type="${multi?"checkbox":"radio"}" name="${q.id}" value="${esc(o)}" ${sel?"checked":""}><span class="lbl">${esc(o)}${parties[o]?` <span class="party">— ${esc(parties[o])}</span>`:""}</span>`;
+    if(q.other===o){ const t=document.createElement("input"); t.type="text"; t.maxLength=120; t.placeholder="Уточните…"; t.value=S.a[q.id+"_other"]||""; t.onclick=e=>e.stopPropagation(); t.oninput=()=>{S.a[q.id+"_other"]=t.value;save();}; l.querySelector(".lbl").appendChild(t); }
+    box.appendChild(l);
+  });
+  if(q.id==="Q9"){ const n=document.createElement("p"); n.className="note"; n.innerHTML=`Не знаете номер округа? <a href="https://cece.cec.md/sites/default/files/2026-09/anexa.pdf" target="_blank" rel="noopener">Посмотрите границы округов по улицам (PDF ЦИС)</a>.`; box.appendChild(n); }
+  box.querySelectorAll("input[type=radio],input[type=checkbox]").forEach(inp=>inp.onchange=()=>onPick(q,card,inp));
+  if(multi) applyMultiState(q,card);
+}
+function onPick(q,card,inp){
+  card.classList.remove("err");
+  if(q.type==="multi"){
+    let arr=Array.isArray(S.a[q.id])?[...S.a[q.id]]:[];
+    const isEx=(q.exclusive||[]).includes(inp.value);
+    if(inp.checked){ if(isEx) arr=[inp.value]; else { arr=arr.filter(v=>!(q.exclusive||[]).includes(v)); arr.push(inp.value); } }
+    else arr=arr.filter(v=>v!==inp.value);
+    S.a[q.id]=arr; save(); applyMultiState(q,card);
+  }else{
+    S.a[q.id]=inp.value;
+    if(q.id==="Q9"){ delete S.a.Q10; }
+    save();
+    card.querySelectorAll(".opt").forEach(o=>o.classList.toggle("sel",o.querySelector("input").checked));
+    if(q.last){ finish(); return; }
+    if(S.page===PAGES&&QUESTIONS.filter(x=>x.page===PAGES&&(!x.show||x.show(S.a))).every(answered)){ finish(); return; }
+    refreshVisibility();
+  }
+}
+function applyMultiState(q,card){
+  const arr=S.a[q.id]||[]; const full=q.max&&arr.length>=q.max; const ex=arr.some(v=>(q.exclusive||[]).includes(v));
+  card.querySelectorAll(".opt").forEach(o=>{const i=o.querySelector("input"); const isEx=(q.exclusive||[]).includes(i.value);
+    i.checked=arr.includes(i.value); o.classList.toggle("sel",i.checked);
+    const dis=!i.checked&&((full&&!isEx)||(ex&&!isEx)); i.disabled=dis; o.classList.toggle("dis",dis);});
+}
+function refreshVisibility(){
+  QUESTIONS.filter(q=>q.page===S.page).forEach(q=>{
+    const card=document.getElementById("card_"+q.id); if(!card) return;
+    const vis=!q.show||q.show(S.a);
+    card.classList.toggle("hidden",!vis);
+    if(!vis){ if(S.a[q.id]!==undefined){delete S.a[q.id];delete S.a[q.id+"_other"];save();} card.dataset.key=""; }
+    else if(q.dyn&&card.dataset.key!==dynKey(q)){ card.dataset.key=dynKey(q); fillOpts(q,card); }
+  });
+}
+function dynKey(q){ return q.id==="Q9"?S.a.Q8:String(districtOf(S.a)); }
+
+/* ======================= ВАЛИДАЦИЯ / НАВИГАЦИЯ ======================= */
+function answered(q){
+  const v=S.a[q.id];
+  if(q.type==="multi") return Array.isArray(v)&&v.length>0&&(!q.other||!v.includes(q.other)||(S.a[q.id+"_other"]||"").trim().length>0);
+  if(q.type==="matrix") return v&&q.rows.every(r=>v[r]);
+  if(q.other&&v===q.other) return (S.a[q.id+"_other"]||"").trim().length>0;
+  return !!v;
+}
+function validatePage(){
+  let first=null;
+  QUESTIONS.filter(q=>q.page===S.page&&(!q.show||q.show(S.a))).forEach(q=>{
+    const card=document.getElementById("card_"+q.id); const ok=answered(q);
+    card.classList.toggle("err",!ok);
+    if(!ok){ card.querySelector(".errmsg").textContent=q.type==="matrix"?"Пожалуйста, ответьте в каждой строке.":(q.other&&S.a[q.id]&&(Array.isArray(S.a[q.id])?S.a[q.id].includes(q.other):S.a[q.id]===q.other))?"Пожалуйста, уточните ваш ответ.":"Пожалуйста, выберите ответ."; if(!first) first=card; }
+  });
+  if(first){ first.scrollIntoView({behavior:"smooth",block:"center"}); return false; }
+  return true;
+}
+function next(){ if(!validatePage()) return; S.page++; save(); send(false); render(); window.scrollTo(0,0); }
+function finish(){ if(!validatePage()) return; S.status="complete"; S.ended=new Date().toISOString(); S.page=PAGES+1; save(); send(false); render(); window.scrollTo(0,0); }
+
+/* ======================= ОТПРАВКА ======================= */
+let lastSent="";
+function payload(){
+  const a=S.a; const row={
+    respondent_id:S.id, collector:S.src, start_date:S.started, end_date:S.ended||"", status:S.status, last_page:Math.min(S.page,PAGES), updated:new Date().toISOString(),
+  };
+  // Q1: столбец на каждый вариант (как в экспорте SurveyMonkey)
+  const q1=QUESTIONS[0]; const sel=Array.isArray(a.Q1)?a.Q1:[];
+  q1.opts.forEach(o=>row["Q1 | "+o]=sel.includes(o)?o:"");
+  row["Q1 | Иное (текст)"]=a.Q1_other||"";
+  ["Q2","Q3","Q4","Q5","Q6","Q7","Q8"].forEach(k=>row[k]=a[k]||"");
+  const d=districtOf(a); row["Q9 | Округ №"]=d||(a.Q9||"");
+  row["Q10"]=a.Q10||""; row["Q10 | Партия"]=d&&a.Q10?((CANDIDATES[d].c.find(c=>c[0]===a.Q10)||[])[1]||""):"";
+  const m=QUESTIONS.find(q=>q.id==="Q11"); m.rows.forEach(r=>row["Q11 | "+r]=(a.Q11||{})[r]||"");
+  row["Q12"]=a.Q12||""; row["Q13"]=a.Q13||""; row["Q13 | Другой (текст)"]=a.Q13_other||""; row["Q14"]=a.Q14||""; row["Q15"]=a.Q15||"";
+  row["Q1 | порядок"]=(S.order.Q1||[]).join(",");
+  return row;
+}
+function send(beacon){
+  if(!ENDPOINT||ENDPOINT.startsWith("PASTE")) return;
+  const body=JSON.stringify({survey:SURVEY_ID,row:payload()});
+  if(body===lastSent) return; lastSent=body;
+  try{
+    if(beacon&&navigator.sendBeacon){ navigator.sendBeacon(ENDPOINT,new Blob([body],{type:"text/plain"})); }
+    else fetch(ENDPOINT,{method:"POST",mode:"no-cors",body,keepalive:true}).catch(()=>{});
+  }catch(e){}
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"&&S.page>=1&&S.page<=PAGES) send(true); });
+window.addEventListener("pagehide",()=>{ if(S.page>=1&&S.page<=PAGES) send(true); });
+
+load(); save(); render();
+</script>
+</body>
+</html>
