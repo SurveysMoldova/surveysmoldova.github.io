@@ -189,7 +189,7 @@ const QUESTIONS=[
  {id:"Q9",page:3,type:"single",text:"В каком избирательном округе вы зарегистрированы?",
   hint:"",dyn:true,show:a=>!!a.Q8&&a.Q8!==NA&&LOC_DISTRICTS[a.Q8].length>1},
  {id:"Q10",page:3,type:"single",text:"Если вы пойдёте на выборы, за кого из этих кандидатов в вашем избирательном округе вы проголосуете?",
-  dyn:true,show:a=>!!districtOf(a)},
+  dyn:true,show:a=>!!districtOf(a)||unknownDistrict(a)},
 
  {id:"Q11",page:4,type:"matrix",text:"В какой степени нижеперечисленные государства и организации на данный момент помогают и поддерживают Гагаузию?",hint:"Один ответ в каждой строке",
   rows:["Центральное правительство Республики Молдова","Турция","Украина","Евросоюз","США","Российская Федерация"],
@@ -223,9 +223,11 @@ function districtOf(a){
   if(d.length===1) return d[0];
   const v=parseInt(String(a.Q9||"").replace(/\D/g,""),10); return (v&&d.includes(v))?v:null;
 }
+function unknownDistrict(a){ return !!a.Q8&&a.Q8!==NA&&(LOC_DISTRICTS[a.Q8]||[]).length>1&&a.Q9==="Не знаю"; }
+function effDistrict(a){ return districtOf(a)||(a.Q10_district?parseInt(a.Q10_district,10):null); }
 function order(q){ // устойчивый случайный порядок для респондента
   const key=q.id+(q.id==="Q10"?"_"+districtOf(S.a):"");
-  const base=q.id==="Q10"?CANDIDATES[districtOf(S.a)].c.map(c=>c[0]):q.opts;
+  const base=q.id==="Q10"?(CANDIDATES[districtOf(S.a)]||{c:[]}).c.map(c=>c[0]):q.opts;
   const n=q.id==="Q10"?base.length:(q.random||0);
   if(!n) return base;
   if(!S.order[key]||S.order[key].length!==base.length){
@@ -281,7 +283,7 @@ function renderQ(q){
     h+=`<div class="opts"></div>`;
   }
   card.innerHTML=h;
-  if(q.type==="select"){ card.querySelector("select").onchange=e=>{S.a[q.id]=e.target.value||undefined; if(q.id==="Q8"){delete S.a.Q9;delete S.a.Q10;} save(); card.classList.remove("err"); refreshVisibility();}; }
+  if(q.type==="select"){ card.querySelector("select").onchange=e=>{S.a[q.id]=e.target.value||undefined; if(q.id==="Q8"){delete S.a.Q9;delete S.a.Q10;delete S.a.Q10_district;} save(); card.classList.remove("err"); refreshVisibility();}; }
   else if(q.type==="matrix"){ card.querySelectorAll("input").forEach(inp=>inp.onchange=()=>{const ri=+inp.name.split("_")[1];S.a[q.id]=S.a[q.id]||{};S.a[q.id][q.rows[ri]]=inp.value;save();card.querySelectorAll(`input[name="${inp.name}"]`).forEach(i=>i.closest(".opt").classList.toggle("sel",i.checked));card.classList.remove("err");}); }
   else if(!q.dyn) fillOpts(q,card);
   return card;
@@ -290,7 +292,8 @@ function fillOpts(q,card){
   const box=card.querySelector(".opts"); box.innerHTML="";
   let opts, parties={};
   if(q.id==="Q9"){ const d=LOC_DISTRICTS[S.a.Q8]||[]; opts=[...d.map(n=>"Округ № "+n),"Не знаю"]; card.querySelector(".hint").textContent=`Для ${S.a.Q8} — несколько округов.`; }
-  else if(q.id==="Q10"){ const d=districtOf(S.a); if(!d){return;} CANDIDATES[d].c.forEach(c=>parties[c[0]]=c[1]); opts=[...order(q),...TAIL_CAND]; card.querySelector(".hint").textContent=`${CANDIDATES[d].n}, избирательный округ № ${d}`; }
+  else if(q.id==="Q10"){ const d=districtOf(S.a); if(d){ CANDIDATES[d].c.forEach(c=>parties[c[0]]=c[1]); opts=[...order(q),...TAIL_CAND]; card.querySelector(".hint").textContent=`${CANDIDATES[d].n}, избирательный округ № ${d}`; }
+    else if(unknownDistrict(S.a)){ return fillGrouped(q,card); } else return; }
   else opts=order(q);
   const multi=q.type==="multi"; const cur=S.a[q.id];
   opts.forEach(o=>{
@@ -304,6 +307,24 @@ function fillOpts(q,card){
   box.querySelectorAll("input[type=radio],input[type=checkbox]").forEach(inp=>inp.onchange=()=>onPick(q,card,inp));
   if(multi) applyMultiState(q,card);
 }
+function fillGrouped(q,card){
+  const box=card.querySelector(".opts"); box.innerHTML="";
+  card.querySelector(".hint").textContent=`Вы не знаете номер округа — ниже все кандидаты по округам (${S.a.Q8}). Выберите одного кандидата: ваш округ определится по нему.`;
+  const cur=S.a.Q10, curD=S.a.Q10_district;
+  const mk=(val,label,party,sel)=>{const l=document.createElement("label"); l.className="opt"+(sel?" sel":""); l.innerHTML=`<input type="radio" name="Q10" value="${esc(val)}" ${sel?"checked":""}><span class="lbl">${esc(label)}${party?` <span class="party">— ${esc(party)}</span>`:""}</span>`; return l;};
+  for(const d of LOC_DISTRICTS[S.a.Q8]){
+    const h=document.createElement("p"); h.className="hint"; h.style.margin="10px 0 4px"; h.style.fontWeight="600"; h.textContent=`Округ № ${d}`; box.appendChild(h);
+    const names=CANDIDATES[d].c.map(c=>c[0]); const key="Q10_"+d;
+    if(!S.order[key]||S.order[key].length!==names.length){const idx=[...Array(names.length).keys()];for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}S.order[key]=idx;save();}
+    S.order[key].map(i=>CANDIDATES[d].c[i]).forEach(c=>box.appendChild(mk(d+"|"+c[0],c[0],c[1],cur===c[0]&&String(curD)===String(d))));
+  }
+  const h=document.createElement("p"); h.className="hint"; h.style.margin="10px 0 4px"; box.appendChild(h);
+  TAIL_CAND.forEach(o=>box.appendChild(mk("0|"+o,o,"",cur===o&&!curD)));
+  box.querySelectorAll("input[type=radio]").forEach(inp=>inp.onchange=()=>{
+    card.classList.remove("err"); const [d,name]=inp.value.split("|"); S.a.Q10=name; if(d!=="0") S.a.Q10_district=d; else delete S.a.Q10_district; save();
+    card.querySelectorAll(".opt").forEach(o=>o.classList.toggle("sel",o.querySelector("input").checked));
+  });
+}
 function onPick(q,card,inp){
   card.classList.remove("err");
   if(q.type==="multi"){
@@ -314,7 +335,7 @@ function onPick(q,card,inp){
     S.a[q.id]=arr; save(); applyMultiState(q,card);
   }else{
     S.a[q.id]=inp.value;
-    if(q.id==="Q9"){ delete S.a.Q10; }
+    if(q.id==="Q9"){ delete S.a.Q10; delete S.a.Q10_district; }
     save();
     card.querySelectorAll(".opt").forEach(o=>o.classList.toggle("sel",o.querySelector("input").checked));
     if(q.last){ finish(); return; }
@@ -333,11 +354,11 @@ function refreshVisibility(){
     const card=document.getElementById("card_"+q.id); if(!card) return;
     const vis=!q.show||q.show(S.a);
     card.classList.toggle("hidden",!vis);
-    if(!vis){ if(S.a[q.id]!==undefined){delete S.a[q.id];delete S.a[q.id+"_other"];save();} card.dataset.key=""; }
+    if(!vis){ if(S.a[q.id]!==undefined){delete S.a[q.id];delete S.a[q.id+"_other"];if(q.id==="Q10")delete S.a.Q10_district;save();} card.dataset.key=""; }
     else if(q.dyn&&card.dataset.key!==dynKey(q)){ card.dataset.key=dynKey(q); fillOpts(q,card); }
   });
 }
-function dynKey(q){ return q.id==="Q9"?S.a.Q8:String(districtOf(S.a)); }
+function dynKey(q){ return q.id==="Q9"?S.a.Q8:String(districtOf(S.a))+"/"+(unknownDistrict(S.a)?"grouped":""); }
 
 /* ======================= ВАЛИДАЦИЯ / НАВИГАЦИЯ ======================= */
 function answered(q){
@@ -371,7 +392,7 @@ function payload(){
   q1.opts.forEach(o=>row["Q1 | "+o]=sel.includes(o)?o:"");
   row["Q1 | Иное (текст)"]=a.Q1_other||"";
   ["Q2","Q3","Q4","Q5","Q6","Q7","Q8"].forEach(k=>row[k]=a[k]||"");
-  const d=districtOf(a); row["Q9 | Округ №"]=d||(a.Q9||"");
+  const d=effDistrict(a); row["Q9 | Округ №"]=d||(a.Q9||""); row["Q9 | источник"]=districtOf(a)?"вопрос":(a.Q10_district?"по кандидату":"");
   row["Q10"]=a.Q10||""; row["Q10 | Партия"]=d&&a.Q10?((CANDIDATES[d].c.find(c=>c[0]===a.Q10)||[])[1]||""):"";
   const m=QUESTIONS.find(q=>q.id==="Q11"); m.rows.forEach(r=>row["Q11 | "+r]=(a.Q11||{})[r]||"");
   row["Q12"]=a.Q12||""; row["Q13"]=a.Q13||""; row["Q13 | Другой (текст)"]=a.Q13_other||""; row["Q14"]=a.Q14||""; row["Q15"]=a.Q15||"";
