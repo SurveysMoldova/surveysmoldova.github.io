@@ -116,6 +116,7 @@ a{color:var(--sky)}
 // После публикации Apps Script вставьте сюда URL веб-приложения (…/exec)
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbyvX2An1iv-JQ1y_25-6e5WzXkmW-HwebXOSq32ixQv3zsbO7-P72M-i4NvagJ4nTpJ/exec";
 const SURVEY_ID = "gagauzia2026";
+const SURVEY_VERSION = "v2"; // v1: проблемы на стр.1; v2 (с 1 ноя 18:30): башкан на стр.1
 
 const NA = "Не хочу отвечать";
 const PARTIC = ["Точно приму участие","Скорее приму участие","Скорее не приму участие","Точно не приму участие","Затрудняюсь ответить",NA];
@@ -167,19 +168,19 @@ const CANDIDATES = {
 /* Вопросы. type: single | multi | matrix | select ; opts; random: число опций в начале списка, которые перемешиваются; show(a): условие показа */
 const Q1_OPTS=["Межнациональные отношения","Инфляция (рост цен)","Безработица","Коррупция","Голод","Будущее автономии","Война в регионе","Преступность","Бедность","Установление диктатуры","Низкое качество медицинских услуг","Энергетический кризис","Маленькая пенсия/зарплата","Отношение центральных властей к Гагаузии"];
 const QUESTIONS=[
- {id:"Q1",page:1,type:"multi",max:3,text:"Какие из перечисленных проблем больше всего беспокоят вас на данный момент?",hint:"Выберите до трёх вариантов",
+ {id:"Q1",page:2,type:"multi",max:3,text:"Какие из перечисленных проблем больше всего беспокоят вас на данный момент?",hint:"Выберите до трёх вариантов",
   opts:[...Q1_OPTS,"Иное (уточните)","Не знаю",NA],random:Q1_OPTS.length,other:"Иное (уточните)",exclusive:["Не знаю",NA]},
- {id:"Q2",page:1,type:"single",text:"Участвовали ли вы в выборах башкана Гагаузии в 2023 году?",
+ {id:"Q2",page:2,type:"single",text:"Участвовали ли вы в выборах башкана Гагаузии в 2023 году?",
   opts:["Да, в обоих турах","Да, только в первом туре","Да, только во втором туре","Нет, не участвовал(а)","Не помню",NA]},
- {id:"Q3",page:1,type:"single",text:"За кого вы голосовали в первом туре (30 апреля 2023)?",
+ {id:"Q3",page:2,type:"single",text:"За кого вы голосовали в первом туре (30 апреля 2023)?",
   opts:["Евгения Гуцул","Григорий Узун","Виктор Петров","Дмитрий Кройтор","Николай Дудогло","Сергей Чимпоеш","Михаил Формузал","Сергей Чернев","Не помню",NA],random:8,
   show:a=>a.Q2==="Да, в обоих турах"||a.Q2==="Да, только в первом туре"},
- {id:"Q4",page:1,type:"single",text:"За кого вы голосовали во втором туре (14 мая 2023)?",
+ {id:"Q4",page:2,type:"single",text:"За кого вы голосовали во втором туре (14 мая 2023)?",
   opts:["Евгения Гуцул","Григорий Узун","Не помню",NA],random:2,
   show:a=>a.Q2==="Да, в обоих турах"||a.Q2==="Да, только во втором туре"},
 
- {id:"Q5",page:2,type:"single",text:"Примете ли вы участие в выборах башкана Гагаузии 15 ноября?",opts:PARTIC},
- {id:"Q6",page:2,type:"single",text:"Если вы пойдёте на выборы, за кого из этих кандидатов вы проголосуете?",
+ {id:"Q5",page:1,type:"single",text:"Примете ли вы участие в выборах башкана Гагаузии 15 ноября?",opts:PARTIC},
+ {id:"Q6",page:1,type:"single",text:"Если вы пойдёте на выборы, за кого из этих кандидатов вы проголосуете?",
   opts:["Фёдор Гагауз","Александр Стояногло","Корнелиу Дудник","Иван Кылчик","Пётр Влах","Иванна Коксал","Сергей Анастасов","Олег Гаризан",...TAIL_CAND],random:8,
   show:a=>!!a.Q5},
 
@@ -385,7 +386,7 @@ function finish(){ if(!validatePage()) return; S.status="complete"; S.ended=new 
 let lastSent="";
 function payload(){
   const a=S.a; const row={
-    respondent_id:S.id, collector:S.src, start_date:S.started, end_date:S.ended||"", status:S.status, last_page:Math.min(S.page,PAGES), updated:new Date().toISOString(),
+    respondent_id:S.id, survey_version:SURVEY_VERSION, collector:S.src, start_date:S.started, end_date:S.ended||"", status:S.status, last_page:Math.min(S.page,PAGES), updated:new Date().toISOString(),
   };
   // Q1: столбец на каждый вариант (как в экспорте SurveyMonkey)
   const q1=QUESTIONS[0]; const sel=Array.isArray(a.Q1)?a.Q1:[];
