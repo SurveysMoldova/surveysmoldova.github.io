@@ -55,7 +55,7 @@ h1{font-size:22px;line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em
 .progress>div{height:100%;background:var(--gold);width:0;transition:width .3s}
 .pcount{font-size:13px;color:var(--muted);margin-bottom:6px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 18px 16px;margin:14px 0}
-.card.err{border-color:var(--err)}
+.card.err{border-color:var(--err);box-shadow:0 0 0 3px rgba(184,53,42,.12)}
 .q{font-weight:600;margin:0 0 4px;font-size:18px;line-height:1.35}
 .hint{color:var(--muted);font-size:14px;margin:0 0 10px}
 .errmsg{display:none;color:var(--err);font-size:14px;margin:0 0 8px;font-weight:500}
@@ -78,6 +78,12 @@ select{appearance:auto}
 .mrow .opt{padding:8px 11px;font-size:15px;align-items:center}
 .mrow .opt input{margin:0;width:16px;height:16px;flex-basis:16px}
 .nav{display:flex;gap:12px;justify-content:space-between;margin-top:20px}
+.qnav{display:flex;justify-content:flex-end;margin-top:14px}
+.btn-nq{background:#e9f1f9;color:var(--sky-d);padding:10px 18px;font-size:15px;border-radius:999px}
+.btn-nq:hover{background:#d9e8f6}
+.card{scroll-margin-top:12px}
+.submit{display:flex;flex-direction:column;align-items:center;gap:8px;margin:18px 0 8px}
+.submit .btn-next{margin:0;width:100%;max-width:360px}
 button{font:inherit;font-weight:600;padding:14px 28px;border-radius:12px;border:0;cursor:pointer;font-size:17px}
 button:focus-visible{outline:3px solid rgba(47,116,181,.4);outline-offset:2px}
 .btn-next{background:var(--sky);color:#fff;margin-left:auto}
@@ -116,7 +122,7 @@ a{color:var(--sky)}
 // После публикации Apps Script вставьте сюда URL веб-приложения (…/exec)
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbyvX2An1iv-JQ1y_25-6e5WzXkmW-HwebXOSq32ixQv3zsbO7-P72M-i4NvagJ4nTpJ/exec";
 const SURVEY_ID = "gagauzia2026";
-const SURVEY_VERSION = "v2"; // v1: проблемы на стр.1; v2 (с 1 ноя 18:30): башкан на стр.1
+const SURVEY_VERSION = "v3"; // v1: проблемы на стр.1; v2 (с 1 ноя 18:30): башкан на стр.1; v3 (с 3 ноя): одна страница
 
 const NA = "Не хочу отвечать";
 const PARTIC = ["Точно приму участие","Скорее приму участие","Скорее не приму участие","Точно не приму участие","Затрудняюсь ответить",NA];
@@ -203,7 +209,11 @@ const QUESTIONS=[
  {id:"Q14",page:5,type:"single",text:"Ваш пол",opts:["Мужской","Женский"]},
  {id:"Q15",page:5,type:"single",text:"Сколько вам лет?",opts:["18–29","30–44","45–59","60+"],last:true}
 ];
+// Порядок показа на единой странице (page сохраняется только для столбца last_page — совместимость с v1/v2)
+const ORDER=["Q5","Q6","Q1","Q2","Q3","Q4","Q7","Q8","Q9","Q10","Q11","Q12","Q13","Q14","Q15"];
+const QS=ORDER.map(id=>QUESTIONS.find(q=>q.id===id));
 const PAGES=5;
+
 
 /* ======================= СОСТОЯНИЕ ======================= */
 const STORE="sv_"+SURVEY_ID;
@@ -212,9 +222,11 @@ let S;
 function load(){
   try{ if(params.get("reset")) localStorage.removeItem(STORE); S=JSON.parse(localStorage.getItem(STORE)||"null"); }catch(e){ S=null; }
   if(!S){
-    S={id:uid(),src:params.get("src")||"direct",started:new Date().toISOString(),page:0,status:"partial",a:{},order:{}};
+    S={id:uid(),src:params.get("src")||"direct",started:new Date().toISOString(),page:1,status:"partial",a:{},order:{}};
   }
   if(!S.src||S.src==="direct") S.src=params.get("src")||S.src||"direct";
+  // Миграция с постраничной версии: ответы сохраняются, страница одна
+  if(S.status==="complete"||S.page>PAGES) S.page=2; else S.page=1;
 }
 function save(){ try{ localStorage.setItem(STORE,JSON.stringify(S)); }catch(e){} }
 function uid(){ const b=new Uint8Array(12); crypto.getRandomValues(b); return Array.from(b,x=>x.toString(16).padStart(2,"0")).join(""); }
@@ -242,33 +254,28 @@ function order(q){ // устойчивый случайный порядок д�
 /* ======================= РЕНДЕР ======================= */
 const main=document.getElementById("main");
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function visibleQs(){ return QS.filter(q=>!q.show||q.show(S.a)); }
 function setProgress(){
-  const p=S.page; document.getElementById("pbar").style.width=(p/PAGES*100)+"%";
-  document.getElementById("pcount").textContent=p>0&&p<=PAGES?`Страница ${p} из ${PAGES}`:"";
+  const vis=visibleQs(), n=vis.filter(answered).length;
+  document.getElementById("pbar").style.width=(S.page>1?100:(vis.length?n/vis.length*100:0))+"%";
+  document.getElementById("pcount").textContent=S.page>1?"":`Отвечено ${n} из ${vis.length}`;
 }
 function render(){
-  setProgress();
-  if(S.page===0) return renderIntro();
-  if(S.page>PAGES) return renderThanks();
-  main.innerHTML="";
-  QUESTIONS.filter(q=>q.page===S.page).forEach(q=>main.appendChild(renderQ(q)));
-  const nav=document.createElement("div"); nav.className="nav";
-  if(S.page>1){const b=document.createElement("button");b.className="btn-prev";b.textContent="Назад";b.onclick=()=>{S.page--;save();render();window.scrollTo(0,0);};nav.appendChild(b);}
-  if(S.page<PAGES){const b=document.createElement("button");b.className="btn-next";b.textContent="Далее";b.onclick=next;nav.appendChild(b);}
-  main.appendChild(nav);
-  refreshVisibility();
-}
-function renderIntro(){
+  if(S.page>1) return renderThanks();
   main.innerHTML=`<div class="card intro">
   <p class="lead">Какие проблемы для вас важнее всего и кому из кандидатов вы доверяете?</p>
   <p>15 ноября 2026 года пройдут выборы башкана и Народного Собрания Гагаузии. Расскажите, что вы думаете сегодня.</p>
-  <p>Опрос полностью анонимен и занимает 3–4 минуты. Мы не собираем имена, телефоны или другие личные данные.</p>
-  <div class="nav"><button class="btn-next" id="start">Начать</button></div></div>`;
-  document.getElementById("start").onclick=()=>{S.page=1;save();render();window.scrollTo(0,0);};
+  <p>Опрос полностью анонимен и занимает 3–4 минуты. Мы не собираем имена, телефоны или другие личные данные. Все вопросы на одной странице — просто листайте вниз.</p></div>`;
+  QS.forEach(q=>main.appendChild(renderQ(q)));
+  const sub=document.createElement("div"); sub.className="submit"; sub.id="submit";
+  sub.innerHTML=`<button class="btn-next" id="finish">Отправить ответы</button><p class="small">Ответы сохраняются и во время заполнения.</p>`;
+  main.appendChild(sub);
+  document.getElementById("finish").onclick=finish;
+  refreshVisibility();
 }
 function renderThanks(){
   main.innerHTML=`<div class="card thanks"><h2>Спасибо!</h2><p>Ваши ответы сохранены.</p><p class="small">Отправьте ссылку друзьям и соседям: чем больше ответов, тем точнее картина.</p></div>`;
-  document.getElementById("pbar").style.width="100%";
+  setProgress(); window.scrollTo(0,0);
 }
 function renderQ(q){
   const card=document.createElement("div"); card.className="card"; card.id="card_"+q.id; card.dataset.q=q.id;
@@ -283,11 +290,21 @@ function renderQ(q){
   }else{
     h+=`<div class="opts"></div>`;
   }
+  h+=`<div class="qnav"><button type="button" class="btn-nq">Следующий вопрос ↓</button></div>`;
   card.innerHTML=h;
-  if(q.type==="select"){ card.querySelector("select").onchange=e=>{S.a[q.id]=e.target.value||undefined; if(q.id==="Q8"){delete S.a.Q9;delete S.a.Q10;delete S.a.Q10_district;} save(); card.classList.remove("err"); refreshVisibility();}; }
-  else if(q.type==="matrix"){ card.querySelectorAll("input").forEach(inp=>inp.onchange=()=>{const ri=+inp.name.split("_")[1];S.a[q.id]=S.a[q.id]||{};S.a[q.id][q.rows[ri]]=inp.value;save();card.querySelectorAll(`input[name="${inp.name}"]`).forEach(i=>i.closest(".opt").classList.toggle("sel",i.checked));card.classList.remove("err");}); }
+  card.querySelector(".btn-nq").onclick=()=>scrollNext(q);
+  if(q.type==="select"){ card.querySelector("select").onchange=e=>{S.a[q.id]=e.target.value||undefined; if(q.id==="Q8"){delete S.a.Q9;delete S.a.Q10;delete S.a.Q10_district;} changed(card);}; }
+  else if(q.type==="matrix"){ card.querySelectorAll("input").forEach(inp=>inp.onchange=()=>{const ri=+inp.name.split("_")[1];S.a[q.id]=S.a[q.id]||{};S.a[q.id][q.rows[ri]]=inp.value;card.querySelectorAll(`input[name="${inp.name}"]`).forEach(i=>i.closest(".opt").classList.toggle("sel",i.checked));changed(card);}); }
   else if(!q.dyn) fillOpts(q,card);
   return card;
+}
+function scrollNext(q){
+  const vis=visibleQs(); const i=vis.indexOf(q);
+  const nxt=vis[i+1]; const el=nxt?document.getElementById("card_"+nxt.id):document.getElementById("submit");
+  if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function changed(card){ // любое изменение ответа
+  card.classList.remove("err"); save(); refreshVisibility(); queueSend();
 }
 function fillOpts(q,card){
   const box=card.querySelector(".opts"); box.innerHTML="";
@@ -301,7 +318,7 @@ function fillOpts(q,card){
     const sel=multi?(Array.isArray(cur)&&cur.includes(o)):cur===o;
     const l=document.createElement("label"); l.className="opt"+(sel?" sel":"");
     l.innerHTML=`<input type="${multi?"checkbox":"radio"}" name="${q.id}" value="${esc(o)}" ${sel?"checked":""}><span class="lbl">${esc(o)}${parties[o]?` <span class="party">— ${esc(parties[o])}</span>`:""}</span>`;
-    if(q.other===o){ const t=document.createElement("input"); t.type="text"; t.maxLength=120; t.placeholder="Уточните…"; t.value=S.a[q.id+"_other"]||""; t.onclick=e=>e.stopPropagation(); t.oninput=()=>{S.a[q.id+"_other"]=t.value;save();}; l.querySelector(".lbl").appendChild(t); }
+    if(q.other===o){ const t=document.createElement("input"); t.type="text"; t.maxLength=120; t.placeholder="Уточните…"; t.value=S.a[q.id+"_other"]||""; t.onclick=e=>e.stopPropagation(); t.oninput=()=>{S.a[q.id+"_other"]=t.value;save();queueSend();}; l.querySelector(".lbl").appendChild(t); }
     box.appendChild(l);
   });
   if(q.id==="Q9"){ const n=document.createElement("p"); n.className="note"; n.innerHTML=`Не знаете номер округа? <a href="https://cece.cec.md/sites/default/files/2026-09/anexa.pdf" target="_blank" rel="noopener">Посмотрите границы округов по улицам (PDF ЦИС)</a>.`; box.appendChild(n); }
@@ -322,26 +339,24 @@ function fillGrouped(q,card){
   const h=document.createElement("p"); h.className="hint"; h.style.margin="10px 0 4px"; box.appendChild(h);
   TAIL_CAND.forEach(o=>box.appendChild(mk("0|"+o,o,"",cur===o&&!curD)));
   box.querySelectorAll("input[type=radio]").forEach(inp=>inp.onchange=()=>{
-    card.classList.remove("err"); const [d,name]=inp.value.split("|"); S.a.Q10=name; if(d!=="0") S.a.Q10_district=d; else delete S.a.Q10_district; save();
+    const [d,name]=inp.value.split("|"); S.a.Q10=name; if(d!=="0") S.a.Q10_district=d; else delete S.a.Q10_district;
     card.querySelectorAll(".opt").forEach(o=>o.classList.toggle("sel",o.querySelector("input").checked));
+    changed(card);
   });
 }
 function onPick(q,card,inp){
-  card.classList.remove("err");
   if(q.type==="multi"){
     let arr=Array.isArray(S.a[q.id])?[...S.a[q.id]]:[];
     const isEx=(q.exclusive||[]).includes(inp.value);
     if(inp.checked){ if(isEx) arr=[inp.value]; else { arr=arr.filter(v=>!(q.exclusive||[]).includes(v)); arr.push(inp.value); } }
     else arr=arr.filter(v=>v!==inp.value);
-    S.a[q.id]=arr; save(); applyMultiState(q,card);
+    S.a[q.id]=arr; applyMultiState(q,card); changed(card);
   }else{
     S.a[q.id]=inp.value;
     if(q.id==="Q9"){ delete S.a.Q10; delete S.a.Q10_district; }
-    save();
     card.querySelectorAll(".opt").forEach(o=>o.classList.toggle("sel",o.querySelector("input").checked));
-    if(q.last){ finish(); return; }
-    if(S.page===PAGES&&QUESTIONS.filter(x=>x.page===PAGES&&(!x.show||x.show(S.a))).every(answered)){ finish(); return; }
-    refreshVisibility();
+    changed(card);
+    if(q.last&&visibleQs().every(answered)) finish();
   }
 }
 function applyMultiState(q,card){
@@ -351,17 +366,20 @@ function applyMultiState(q,card){
     const dis=!i.checked&&((full&&!isEx)||(ex&&!isEx)); i.disabled=dis; o.classList.toggle("dis",dis);});
 }
 function refreshVisibility(){
-  QUESTIONS.filter(q=>q.page===S.page).forEach(q=>{
+  QS.forEach(q=>{
     const card=document.getElementById("card_"+q.id); if(!card) return;
     const vis=!q.show||q.show(S.a);
     card.classList.toggle("hidden",!vis);
     if(!vis){ if(S.a[q.id]!==undefined){delete S.a[q.id];delete S.a[q.id+"_other"];if(q.id==="Q10")delete S.a.Q10_district;save();} card.dataset.key=""; }
     else if(q.dyn&&card.dataset.key!==dynKey(q)){ card.dataset.key=dynKey(q); fillOpts(q,card); }
   });
+  const vis=visibleQs(); const lastId=vis.length?vis[vis.length-1].id:null;
+  QS.forEach(q=>{ const b=document.querySelector("#card_"+q.id+" .btn-nq"); if(b) b.textContent=q.id===lastId?"К отправке ↓":"Следующий вопрос ↓"; });
+  setProgress();
 }
 function dynKey(q){ return q.id==="Q9"?S.a.Q8:String(districtOf(S.a))+"/"+(unknownDistrict(S.a)?"grouped":""); }
 
-/* ======================= ВАЛИДАЦИЯ / НАВИГАЦИЯ ======================= */
+/* ======================= ВАЛИДАЦИЯ / ОТПРАВКА ОТВЕТОВ ======================= */
 function answered(q){
   const v=S.a[q.id];
   if(q.type==="multi") return Array.isArray(v)&&v.length>0&&(!q.other||!v.includes(q.other)||(S.a[q.id+"_other"]||"").trim().length>0);
@@ -369,9 +387,9 @@ function answered(q){
   if(q.other&&v===q.other) return (S.a[q.id+"_other"]||"").trim().length>0;
   return !!v;
 }
-function validatePage(){
+function validateAll(){
   let first=null;
-  QUESTIONS.filter(q=>q.page===S.page&&(!q.show||q.show(S.a))).forEach(q=>{
+  visibleQs().forEach(q=>{
     const card=document.getElementById("card_"+q.id); const ok=answered(q);
     card.classList.toggle("err",!ok);
     if(!ok){ card.querySelector(".errmsg").textContent=q.type==="matrix"?"Пожалуйста, ответьте в каждой строке.":(q.other&&S.a[q.id]&&(Array.isArray(S.a[q.id])?S.a[q.id].includes(q.other):S.a[q.id]===q.other))?"Пожалуйста, уточните ваш ответ.":"Пожалуйста, выберите ответ."; if(!first) first=card; }
@@ -379,17 +397,20 @@ function validatePage(){
   if(first){ first.scrollIntoView({behavior:"smooth",block:"center"}); return false; }
   return true;
 }
-function next(){ if(!validatePage()) return; S.page++; save(); send(false); render(); window.scrollTo(0,0); }
-function finish(){ if(!validatePage()) return; S.status="complete"; S.ended=new Date().toISOString(); S.page=PAGES+1; save(); send(false); render(); window.scrollTo(0,0); }
+function finish(){ if(!validateAll()) return; S.status="complete"; S.ended=new Date().toISOString(); S.page=2; save(); send(false); render(); }
 
 /* ======================= ОТПРАВКА ======================= */
-let lastSent="";
+let lastSent="", sendTimer=null;
+function queueSend(){ clearTimeout(sendTimer); sendTimer=setTimeout(()=>send(false),1500); }
 function payload(){
-  const a=S.a; const row={
-    respondent_id:S.id, survey_version:SURVEY_VERSION, collector:S.src, start_date:S.started, end_date:S.ended||"", status:S.status, last_page:Math.min(S.page,PAGES), updated:new Date().toISOString(),
+  const a=S.a; const ansd=QS.filter(q=>(!q.show||q.show(a))&&answered(q));
+  const row={
+    respondent_id:S.id, survey_version:SURVEY_VERSION, collector:S.src, start_date:S.started, end_date:S.ended||"", status:S.status,
+    last_page:S.status==="complete"?PAGES:Math.max(0,...ansd.map(q=>q.page)), // «страница» по нумерации v1/v2 — для сравнения
+    last_question:ansd.length?ansd[ansd.length-1].id:"", answered_n:ansd.length, updated:new Date().toISOString(),
   };
   // Q1: столбец на каждый вариант (как в экспорте SurveyMonkey)
-  const q1=QUESTIONS[0]; const sel=Array.isArray(a.Q1)?a.Q1:[];
+  const q1=QUESTIONS.find(q=>q.id==="Q1"); const sel=Array.isArray(a.Q1)?a.Q1:[];
   q1.opts.forEach(o=>row["Q1 | "+o]=sel.includes(o)?o:"");
   row["Q1 | Иное (текст)"]=a.Q1_other||"";
   ["Q2","Q3","Q4","Q5","Q6","Q7","Q8"].forEach(k=>row[k]=a[k]||"");
@@ -402,15 +423,16 @@ function payload(){
 }
 function send(beacon){
   if(!ENDPOINT||ENDPOINT.startsWith("PASTE")) return;
-  const body=JSON.stringify({survey:SURVEY_ID,row:payload()});
-  if(body===lastSent) return; lastSent=body;
+  const row=payload(); if(!row.answered_n) return; // ничего не отправляем, пока нет ни одного ответа
+  const body=JSON.stringify({survey:SURVEY_ID,row});
+  const sig=body.replace(/"updated":"[^"]*"/,""); if(sig===lastSent) return; lastSent=sig;
   try{
     if(beacon&&navigator.sendBeacon){ navigator.sendBeacon(ENDPOINT,new Blob([body],{type:"text/plain"})); }
     else fetch(ENDPOINT,{method:"POST",mode:"no-cors",body,keepalive:true}).catch(()=>{});
   }catch(e){}
 }
-document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"&&S.page>=1&&S.page<=PAGES) send(true); });
-window.addEventListener("pagehide",()=>{ if(S.page>=1&&S.page<=PAGES) send(true); });
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"&&S.page===1){ clearTimeout(sendTimer); send(true); } });
+window.addEventListener("pagehide",()=>{ if(S.page===1){ clearTimeout(sendTimer); send(true); } });
 
 load(); save(); render();
 </script>
